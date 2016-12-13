@@ -9,6 +9,8 @@ var MongoClient = mongodb.MongoClient;
 var mongoose = require('mongoose');
 */
 
+
+
 var noticias = [];
 
 var titleHackaton = "Hackaton";
@@ -75,44 +77,43 @@ manejadorDeEventos.getIndex = function(res){
   res.sendFile( __dirname + "/index.html" );
 };
 
+mu.root = __dirname + '/templates';
 
 
-app.use('/assets/css', express.static(__dirname + '/assets/css'));
-app.use('/images', express.static(__dirname + '/images'));
-app.use('/assets/js', express.static(__dirname + '/assets/js'));
 
 var errorPath = "error404.html";
 
-app.get('/', function (req, res) {
-  manejadorDeEventos.getIndex(res);
-});
-app.get('/index.html', function (req, res) {
-   manejadorDeEventos.getIndex(res);
-});
-app.get('/index', function (req, res) {
-   manejadorDeEventos.getIndex(res);
-});
+var getIndex = function (req, res) {
+
+  //var idReq = req.params.id;
+  mu.clearCache();
+  var stream = mu.compileAndRender('index.html', {'noticias': noticias, 'titleHackaton': titleHackaton});
+  stream.pipe(res);
+
+}
 
 
 app.get('/posts/new', function (req, res) {
   manejadorDeEventos.getUltimo(res);
 });
 
-app.get('/posts/:id', function (req, res) {
-
-  //var idReq = req.params.id;
-  mu.clearCache();
-  var stream = mu.compileAndRender('index.html', {'noticias': noticias});
-  stream.pipe(res);
-
+app.get('/', function(req,res){
+  getIndex(req, res);
 });
+app.get('/index.html', function (req, res) {
+   getIndex(req, res);
+});
+app.get('/index', function (req, res) {
+   getIndex(req, res);
+});
+
 
 app.delete('/posts/:id', function (req, res) {
   res.end(JSON.stringify(posts[id]));
 });
 
 app.get('/catastrofe.html',function(req, res){
-  res.sendFile(__dirname + "/views/catastrofe.html");
+  res.sendFile(__dirname + "/templates/catastrofe.html");
 })
 
 
@@ -148,6 +149,13 @@ app.get('/posts', function (req, res) {
 
 
 
+
+
+
+
+app.use('/assets/css', express.static(__dirname + '/assets/css'));
+app.use('/images', express.static(__dirname + '/images'));
+app.use('/assets/js', express.static(__dirname + '/assets/js'));
 
 
 var server = app.listen(process.env.PORT || 3000, function () {
