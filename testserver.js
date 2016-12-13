@@ -20,10 +20,10 @@ var titleHackaton = "Hackaton";
 
 var noticia = {};
 
-noticia.tituloNoticia = "tituloNoticiatest";
-noticia.resumenNoticia = "Resumen testing loco";
+noticia.tituloNoticia = "Un fuerte terremoto sacudió Japón";
+noticia.resumenNoticia = "Alcanzó los 6,6 grados de magnitud en la escala abierta de Ritcher. El temblor se sintió en la prefectura de Tottori, en el oeste nipón, sin que se active la alerta de tsunami.";
 noticia.link = "unlinkbienpiolah.com";
-noticia.pathImage = "rickyfort.jpg";
+noticia.pathImagen = "../images/pic02.jpg";
 
 noticias.push(noticia)
 
