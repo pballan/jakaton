@@ -87,6 +87,11 @@ app.get('/catastrofe.html',function(req, res){
   res.sendFile(__dirname + "/templates/catastrofe.html");
 })
 
+app.get('/addCatastrofe.html', function(req, res){
+  res.sendFile(__dirname + "/templates/catastrofe.html");
+
+})
+
 
 app.get('/cargar_catastrofe', function (req, res) {
 
@@ -96,10 +101,10 @@ app.get('/cargar_catastrofe', function (req, res) {
       link:req.query.link,
       imagen:req.query.imagen
    };
+   console.log(baseMongo);
+   baseMongo.insertOne(nuevoDocumento);
 
-   baseMongo.insert(nuevoDocumento);
-
-   res.sendFile( __dirname + "/index.html" );
+   res.sendFile( __dirname + "/templates/index.html" );
 })
 
 
@@ -147,7 +152,7 @@ MongoClient.connect(url, function (err, db) {
 
     server.listen(process.env.PORT || 3000);
     console.log('Connection established to', url);
-    baseMongo = db;
+    baseMongo = db.collection('catastrofes');
 
   }
 });
