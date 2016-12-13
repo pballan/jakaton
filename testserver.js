@@ -1,13 +1,16 @@
 var http = require('http');
 var express = require('express');
 var manejadorDeEventos = {};
+var manejadorDeBase = {};
 var mu = require('mu2')
 var request = require('request');
 var _ = require('underscore');
-/*var mongodb = require('mongodb');
+var mongodb = require('mongodb');
 var MongoClient = mongodb.MongoClient;
 var mongoose = require('mongoose');
-*/
+var baseMongo = null;
+
+mu.root = __dirname + '/templates';
 
 
 
@@ -26,41 +29,12 @@ noticias.push(noticia)
 
 
 
-//mongoose.connect('mongodb://localhost/admin')
-/*
+mongoose.connect('mongodb://localhost/admin')
+
 var url = 'mongodb://localhost:27017/admin';
 
 
-MongoClient.connect(url, function (err, db) {
-  if (err) {
-    console.log('Unable to connect to the mongoDB server. Error:', err);
-  } else {
-    //HURRAY!! We are connected. :)
-    console.log('Connection established to', url);
 
-    // Get the documents collection
-    db.createCollection('usuarios');
-
-
-    var collection = db.collection('usuarios');
-
-    //collection.insert({name: 'menem'});
-
-    collection.find({name: 'menem'}).toArray(function (err, result) {
-      if (err) {
-        console.log(err);
-      } else if (result.length) {
-        console.log('Found:', result);
-        valor = result;
-      } else {
-        console.log('No document(s) found with defined "find" criteria!');
-      }
-      //Close connection
-      db.close();
-    });
-  }
-});
-*/
 
 
 var app = express();
@@ -74,37 +48,34 @@ manejadorDeEventos.getUltimo = function(res){
 };
 
 manejadorDeEventos.getIndex = function(res){
-  res.sendFile( __dirname + "/index.html" );
+  //var idReq = req.params.id;
+  mu.clearCache();
+  var stream = mu.compileAndRender('index.html', {'noticias': noticias, 'titleHackaton': titleHackaton});
+  stream.pipe(res);
 };
 
-mu.root = __dirname + '/templates';
+
+
+
+
+
+
+
+
 
 
 
 var errorPath = "error404.html";
 
-var getIndex = function (req, res) {
-
-  //var idReq = req.params.id;
-  mu.clearCache();
-  var stream = mu.compileAndRender('index.html', {'noticias': noticias, 'titleHackaton': titleHackaton});
-  stream.pipe(res);
-
-}
-
-
-app.get('/posts/new', function (req, res) {
-  manejadorDeEventos.getUltimo(res);
-});
 
 app.get('/', function(req,res){
-  getIndex(req, res);
+  manejadorDeEventos.getIndex(res);
 });
 app.get('/index.html', function (req, res) {
-   getIndex(req, res);
+  manejadorDeEventos.getIndex(res);
 });
 app.get('/index', function (req, res) {
-   getIndex(req, res);
+  manejadorDeEventos.getIndex(res);
 });
 
 
@@ -119,14 +90,16 @@ app.get('/catastrofe.html',function(req, res){
 
 app.get('/cargar_catastrofe', function (req, res) {
 
-   datos = {
-      noticia:req.query.noticia,
-      titulo:req.query.titulo
+   nuevoDocumento = {
+      resumen:req.query.noticia,
+      titulo:req.query.titulo,
+      link:req.query.link,
+      imagen:req.query.imagen
    };
-   id++;
 
-   posts[id] = datos;
-   res.sendFile( __dirname + "/public/index.html" );
+   baseMongo.insert(nuevoDocumento);
+
+   res.sendFile( __dirname + "/index.html" );
 })
 
 
@@ -165,5 +138,16 @@ var server = app.listen(process.env.PORT || 3000, function () {
    console.log("Example app listening at http://%s:%s", host, port)
 })
 
+MongoClient.connect(url, function (err, db) {
+  if (err) {
 
-server.listen(process.env.PORT || 3000);
+    console.log('Unable to connect to the mongoDB server. Error:', err);
+
+  } else {
+
+    server.listen(process.env.PORT || 3000);
+    console.log('Connection established to', url);
+    baseMongo = db;
+
+  }
+});
